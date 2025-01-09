@@ -1,7 +1,8 @@
 mod chrome_history;
 use std::{
     env,
-    fs::{self, File}, io::BufReader,
+    fs::{self, File},
+    io::BufReader,
 };
 
 use chrome_history::ChromeInfo;

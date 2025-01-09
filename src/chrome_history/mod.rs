@@ -1,5 +1,5 @@
-mod deserialize;
 mod db;
+mod deserialize;
 use deserialize::deserialize;
 use serde::{Deserialize, Serialize};
 
@@ -9,9 +9,9 @@ pub struct ChromeInfo {
     pub time_range: String,
 }
 
-#[derive(Serialize,Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct HistoryItem {
-   pub title: String,
-   pub url: String,
-   pub time_usec: i64,
+    pub title: String,
+    pub url: String,
+    pub time_usec: i64,
 }

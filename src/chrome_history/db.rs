@@ -6,7 +6,7 @@ use sqlite::Connection;
 
 use super::HistoryItem;
 const BATCH: i64 = 10000;
-const SQL_DDL: &str="CREATE TABLE IF NOT EXISTS history (time INTEGER,title TEXT,url TEXT,CONSTRAINT pk PRIMARY KEY (time));";
+const SQL_DDL: &str="CREATE TABLE IF NOT EXISTS history (time INTEGER PRIMARY KEY DESC, title TEXT, url TEXT) WITHOUT ROWID;";
 pub struct DB {
     con: Connection,
     is_in_transaction: bool,
@@ -35,7 +35,7 @@ impl DB {
             panic!("bad transaction change");
         }
         self.con.execute("BEGIN TRANSACTION;").unwrap();
-        self.is_in_transaction=true;
+        self.is_in_transaction = true;
     }
 
     fn end_transaction(&mut self) {
@@ -43,7 +43,7 @@ impl DB {
             panic!("bad transaction change");
         }
         self.con.execute("END TRANSACTION;").unwrap();
-        self.is_in_transaction=false;
+        self.is_in_transaction = false;
         self.batch_count += 1;
     }
 
@@ -101,5 +101,8 @@ impl Drop for DB {
         if self.is_in_transaction {
             self.end_transaction();
         }
+        info!("begin VACUUM");
+        self.con.execute("VACUUM;").unwrap();
+        info!("end VACUUM");
     }
 }
