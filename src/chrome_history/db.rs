@@ -4,7 +4,7 @@ use chrono::DateTime;
 use log::{error, info};
 use sqlite::Connection;
 
-use super::HistoryItem;
+use super::{HistoryItem, TEMPORARY_DATABASE_FILE_NAME};
 const BATCH: i64 = 10000;
 const SQL_DDL: &str="CREATE TABLE IF NOT EXISTS history (time INTEGER PRIMARY KEY DESC, title TEXT, url TEXT) WITHOUT ROWID;";
 pub struct DB {
@@ -17,7 +17,7 @@ pub struct DB {
 }
 
 pub fn new_db() -> DB {
-    let con = sqlite::open("history.db3").unwrap();
+    let con = sqlite::open(TEMPORARY_DATABASE_FILE_NAME).unwrap();
     con.execute(SQL_DDL).unwrap();
     return DB {
         con: con,
@@ -68,7 +68,10 @@ impl DB {
             state.bind((2, item.title.as_str())).unwrap();
             state.bind((3, item.url.as_str())).unwrap();
             if let Err(_) = state.next() {
-                error!("{}", serde_json::to_string(&item).unwrap());
+                error!(
+                    "insert faliled: {}",
+                    serde_json::to_string(&item).unwrap_or("get error message failed".to_string())
+                );
             }
         }
 
@@ -102,7 +105,9 @@ impl Drop for DB {
             self.end_transaction();
         }
         info!("begin VACUUM");
-        self.con.execute("VACUUM;").unwrap();
+        if let Err(e) = self.con.execute("VACUUM;") {
+            error!("VACUUM failed: {}", e.message.unwrap_or("".to_string()));
+        }
         info!("end VACUUM");
     }
 }

@@ -1,3 +1,4 @@
+use log::error;
 use serde::de::{SeqAccess, Visitor};
 use serde::Deserializer;
 use std::fmt;
@@ -26,7 +27,9 @@ impl<'de> Visitor<'de> for HistoryVisitor {
                     Some(item) => db.add(item),
                     None => break,
                 },
-                Err(err) => return Err(err),
+                Err(err) => {
+                    error!("deserialize failed: {}",err.to_string());
+                    return Err(err)},
             }
         }
         Ok(db.export_time())

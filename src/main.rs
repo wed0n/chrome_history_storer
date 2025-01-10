@@ -5,15 +5,16 @@ use std::{
     io::BufReader,
 };
 
-use chrome_history::ChromeInfo;
+use chrome_history::{ChromeInfo, TEMPORARY_DATABASE_FILE_NAME};
 use log::{error, info};
 
 fn main() {
+    let mut builder = env_logger::builder();
+    builder.format_timestamp_millis();
     if let Err(_) = env::var("RUST_LOG") {
-        let _ = env_logger::builder()
-            .filter_level(log::LevelFilter::Info)
-            .try_init();
+        builder.filter_level(log::LevelFilter::Info);
     }
+    builder.try_init().unwrap();
 
     let args: Vec<String> = env::args().collect();
     if args.len() != 2 {
@@ -24,8 +25,19 @@ fn main() {
     let path = &args[1];
     let file = File::open(path).unwrap();
     let reader = BufReader::new(file);
-    let result: ChromeInfo = serde_json::from_reader(reader).unwrap();
-    let time_str = result.time_range;
-    fs::rename("history.db3", format!("chrome_history_{}.db3", &time_str)).unwrap();
+    match serde_json::from_reader::<_, ChromeInfo>(reader) {
+        Ok(result) => {
+            let time_str = result.time_range;
+            fs::rename(
+                TEMPORARY_DATABASE_FILE_NAME,
+                format!("chrome_history_{}.db3", &time_str),
+            )
+            .unwrap();
+        }
+        Err(_) => {
+            error!("deserialize {} failed", path)
+        }
+    };
+
     info!("Finish");
 }
