@@ -97,6 +97,13 @@ impl DB {
         let time_str = format!("{}~{}", begin_time, end_time);
         return time_str;
     }
+    pub fn vacuum(&self) {
+        info!("begin VACUUM");
+        if let Err(e) = self.con.execute("VACUUM;") {
+            error!("VACUUM failed: {}", e.message.unwrap_or("".to_string()));
+        }
+        info!("end VACUUM");
+    }
 }
 
 impl Drop for DB {

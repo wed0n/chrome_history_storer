@@ -28,10 +28,12 @@ impl<'de> Visitor<'de> for HistoryVisitor {
                     None => break,
                 },
                 Err(err) => {
-                    error!("deserialize failed: {}",err.to_string());
-                    return Err(err)},
+                    error!("deserialize failed: {}", err.to_string());
+                    return Err(err);
+                }
             }
         }
+        db.vacuum();
         Ok(db.export_time())
     }
 }

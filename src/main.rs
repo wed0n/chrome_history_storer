@@ -39,5 +39,5 @@ fn main() {
         }
     };
 
-    info!("Finish");
+    info!("finish");
 }
