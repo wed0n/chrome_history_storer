@@ -5,7 +5,7 @@ use std::fmt;
 use std::marker::PhantomData;
 
 use super::db::new_db;
-use super::HistoryItem;
+use super::{batch_insert_item, HistoryItem, TEMPORARY_DATABASE_FILE_NAME};
 
 type ReturnType = String;
 struct HistoryVisitor(PhantomData<fn() -> HistoryItem>);
@@ -20,21 +20,13 @@ impl<'de> Visitor<'de> for HistoryVisitor {
     where
         S: SeqAccess<'de>,
     {
-        let mut db = new_db();
-        loop {
-            match seq.next_element::<HistoryItem>() {
-                Ok(op) => match op {
-                    Some(item) => db.add(item),
-                    None => break,
-                },
-                Err(err) => {
-                    error!("deserialize failed: {}", err.to_string());
-                    return Err(err);
-                }
-            }
-        }
-        db.vacuum();
-        Ok(db.export_time())
+        let mut db = new_db(TEMPORARY_DATABASE_FILE_NAME);
+        return batch_insert_item::<S::Error>(&mut db, || {
+            seq.next_element::<HistoryItem>().map_err(|err| {
+                error!("deserialize failed: {}", err.to_string());
+                err
+            })
+        });
     }
 }
 
