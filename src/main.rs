@@ -24,9 +24,9 @@ enum Commands {
         path: PathBuf,
     },
     Search {
-        #[arg(value_name = "pattern", help = "search regex pattern")]
+        #[arg(value_name = "regex_pattern", help = "search regex pattern")]
         pattern: String,
-        #[arg(value_name = "chrmoe_history.db3", help = "history dababase file")]
+        #[arg(value_name = "chrome_history.db3", help = "history dababase file")]
         path: PathBuf,
     },
 }

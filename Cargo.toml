@@ -1,5 +1,5 @@
 [package]
-name = "chrome_history_store"
+name = "chrome_history_storer"
 version = "0.1.0"
 edition = "2021"
 
