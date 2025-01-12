@@ -2,9 +2,10 @@ mod db;
 mod deserialize;
 mod search;
 use chrono::DateTime;
-use db::DB;
+pub use db::{new_db, DB};
 use deserialize::deserialize;
 use log::info;
+pub use search::search;
 use serde::{Deserialize, Serialize};
 
 pub const TEMPORARY_DATABASE_FILE_NAME: &str = "chrome_history_tmp.db3";

@@ -10,7 +10,7 @@ pub struct DB {
     is_in_transaction: bool,
 }
 
-pub fn new_db(path: &str) -> DB {
+pub fn new_db<T: AsRef<std::path::Path>>(path: T) -> DB {
     let con = sqlite::open(path).unwrap();
     con.execute(SQL_DDL).unwrap();
     return DB {
@@ -68,9 +68,9 @@ impl DB {
                 sqlite::State::Done => None,
             },
             Err(err) => {
-                error!("select item failed: {}",err.message.unwrap_or_default());
+                error!("select item failed: {}", err.message.unwrap_or_default());
                 return None;
-            },
+            }
         };
     }
 
